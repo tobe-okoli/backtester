@@ -53,7 +53,7 @@ def model_to_dict(model, recurse=True, backrefs=False, only=None,
 
     if manytomany:
         for name, m2m in model._meta.manytomany.items():
-            if should_skip(name):
+            if should_skip(m2m):
                 continue
 
             exclude.update((m2m, m2m.rel_model._meta.manytomany[m2m.backref]))
@@ -77,8 +77,10 @@ def model_to_dict(model, recurse=True, backrefs=False, only=None,
 
         field_data = model.__data__.get(field.name)
         if isinstance(field, ForeignKeyField) and recurse and field.lazy_load:
-            if field_data is not None:
-                rel_obj = getattr(model, field.name)
+            # rel_obj may be None despite a fk value: a cached outer-join miss.
+            rel_obj = getattr(model, field.name) \
+                if field_data is not None else None
+            if rel_obj is not None:
                 field_data = model_to_dict(
                     rel_obj,
                     recurse=recurse,
@@ -148,9 +150,8 @@ def update_model_from_dict(instance, data, ignore_unknown=False):
         is_foreign_key = isinstance(field, ForeignKeyField)
 
         if not is_backref and is_foreign_key and isinstance(value, dict):
-            try:
-                rel_instance = instance.__rel__[field.name]
-            except KeyError:
+            rel_instance = instance.__rel__.get(field.name)
+            if rel_instance is None:
                 rel_instance = field.rel_model()
             setattr(
                 instance,
@@ -295,7 +296,7 @@ def resolve_multimodel_query(query, key='_model_identifier'):
         model_class = curr.model
         name = model_class._meta.table_name
         mapping[name] = model_class
-        curr._returning.append(Value(name).alias(key))
+        curr._returning = tuple(curr._returning) + (Value(name).alias(key),)
 
     def wrapped_iterator():
         for row in query.dicts().iterator():

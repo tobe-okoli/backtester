@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 class Portfolio:
   def __init__(self, data: pd.DataFrame, signals: pd.Series, initial_cash: float):
     self.data = data
@@ -31,4 +32,3 @@ class Portfolio:
       history.append(total_value)
 
     return pd.DataFrame(history, index=self.data.index, columns=['Total Value'])
-

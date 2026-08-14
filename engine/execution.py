@@ -12,3 +12,5 @@ class Execution:
             trade_price = trade_price * (1 - self.slippage)
             trade_price = trade_price * (1 - self.commission)
         return trade_price
+
+        
