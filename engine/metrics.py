@@ -1,7 +1,4 @@
 import pandas as pd
-from data import fetch_stock_data
-from strategy import SMAStrategy
-from portfolio import Portfolio
 
 def calculate_total_return (portolfio_data : pd.DataFrame) -> float:
   initial_value = portolfio_data.iat[0, 0]
@@ -12,22 +9,19 @@ def calculate_total_return (portolfio_data : pd.DataFrame) -> float:
   return total_return
 
 def calculate_max_drawdown(portfolio_data : pd.DataFrame) -> float:
-  portfolio_data['Running Peak'] = portfolio_data['Total Value'].cummax()
+  running_peak = portfolio_data['Total Value'].cummax()
+  drawdowns = (portfolio_data["Total Value"] - running_peak)/ running_peak
+  max_drawdown = drawdowns.min()
 
+  return max_drawdown
 
+def calculate_sharpe(portfolio_data : pd.DataFrame) -> float:
+  pct_change = portfolio_data['Total Value'].pct_change()
+  mean_daily_return = pct_change.mean()
+  std_daily_return = pct_change.std()
 
+  sr = (mean_daily_return / std_daily_return) * (252 ** 0.5)
 
-if __name__ == "__main__":
+  return sr
 
-  #DEBUGGING
-
-  data = pd.read_csv("AAPL_data.csv", index_col="Date", parse_dates=True)
-  strategy = SMAStrategy(short_window=50, long_window=100)
-  signals = strategy.generate_signals(data)
-
-  portfolio_test = Portfolio(data, signals, 10000 )
-  portfolio_output = portfolio_test.simulate_trades()
-
-  result = calculate_max_drawdown(portfolio_output)
-  print(result)
 
