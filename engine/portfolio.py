@@ -1,11 +1,12 @@
 import pandas as pd
-
+from execution import Execution
 
 class Portfolio:
-  def __init__(self, data: pd.DataFrame, signals: pd.Series, initial_cash: float):
+  def __init__(self, data: pd.DataFrame, signals: pd.Series, initial_cash: float, execution: Execution):
     self.data = data
     self.signals = signals
     self.initial_cash = initial_cash
+    self.execution = execution
 
   
   def simulate_trades(self) -> pd.DataFrame:
@@ -18,12 +19,16 @@ class Portfolio:
       todays_signal = self.signals.get(date, 0)
       
       if todays_signal == 1:
-        shares_to_buy = cash // row['Close']
+        price = self.execution.calculate_trade_price(row['Close'], 1)
+
+        shares_to_buy = cash // price
         shares += shares_to_buy
-        cash -= shares_to_buy * row['Close']
+        cash -= shares_to_buy * price
 
       elif todays_signal == -1:
-        cash += shares * row['Close']
+        price = self.execution.calculate_trade_price(row['Close'], -1)
+
+        cash += shares * price
         shares = 0
       else:
         pass

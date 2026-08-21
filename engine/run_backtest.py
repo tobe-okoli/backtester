@@ -10,7 +10,7 @@ def run_backtest(ticker : str, start : str, end :str , strategy : Strategy, init
   signals = strategy.generate_signals(data)
   execution = Execution(0.001, 0.001)
 
-  port = Portfolio(data, signals, initial_cash)
+  port = Portfolio(data, signals, initial_cash, execution)
   final_port = port.simulate_trades()
 
   total_return = metrics.calculate_total_return(final_port)
