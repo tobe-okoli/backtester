@@ -1,121 +1,163 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
 
+// Dummy results — visual placeholder only, not wired to the backend yet.
+const DUMMY_RESULTS = {
+  totalReturn: -0.0210,
+  maxDrawdown: -0.1352,
+  sharpeRatio: -0.12,
+}
+
+function formatPercent(value) {
+  return `${(value * 100).toFixed(2)}%`
+}
+
+function MetricCard({ label, value, isPercent }) {
+  const isNegative = value < 0
+  return (
+    <div className="metric-card">
+      <div className="metric-label">{label}</div>
+      <div className={`metric-value ${isNegative ? 'negative' : 'positive'}`}>
+        {isPercent ? formatPercent(value) : value.toFixed(2)}
+      </div>
+    </div>
+  )
+}
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [form, setForm] = useState({
+    ticker: 'AAPL',
+    start: '2023-01-01',
+    end: '2024-01-01',
+    initialCash: 10000,
+    slippage: 0.001,
+    commission: 0.001,
+    shortWindow: 50,
+    longWindow: 100,
+  })
+
+  const handleChange = (field) => (e) => {
+    setForm((prev) => ({ ...prev, [field]: e.target.value }))
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    // Visual pass only — no API call wired up yet.
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app">
+      <header className="app-header">
+        <h1>Backtester</h1>
+      </header>
 
-      <div className="ticks"></div>
+      <main className="app-main">
+        <form className="backtest-form" onSubmit={handleSubmit}>
+          <div className="field">
+            <label htmlFor="ticker">Ticker</label>
+            <input
+              id="ticker"
+              type="text"
+              value={form.ticker}
+              onChange={handleChange('ticker')}
+            />
+          </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          <div className="field">
+            <label htmlFor="start">Start Date</label>
+            <input
+              id="start"
+              type="date"
+              value={form.start}
+              onChange={handleChange('start')}
+            />
+          </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+          <div className="field">
+            <label htmlFor="end">End Date</label>
+            <input
+              id="end"
+              type="date"
+              value={form.end}
+              onChange={handleChange('end')}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="initialCash">Initial Cash</label>
+            <input
+              id="initialCash"
+              type="number"
+              value={form.initialCash}
+              onChange={handleChange('initialCash')}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="slippage">Slippage</label>
+            <input
+              id="slippage"
+              type="number"
+              step="0.001"
+              value={form.slippage}
+              onChange={handleChange('slippage')}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="commission">Commission</label>
+            <input
+              id="commission"
+              type="number"
+              step="0.001"
+              value={form.commission}
+              onChange={handleChange('commission')}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="shortWindow">Short Window</label>
+            <input
+              id="shortWindow"
+              type="number"
+              value={form.shortWindow}
+              onChange={handleChange('shortWindow')}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="longWindow">Long Window</label>
+            <input
+              id="longWindow"
+              type="number"
+              value={form.longWindow}
+              onChange={handleChange('longWindow')}
+            />
+          </div>
+
+          <button type="submit" className="run-button">
+            Run Backtest
+          </button>
+        </form>
+
+        <section className="results">
+          <h2>Results</h2>
+          <div className="metrics-row">
+            <MetricCard
+              label="Total Return"
+              value={DUMMY_RESULTS.totalReturn}
+              isPercent
+            />
+            <MetricCard
+              label="Max Drawdown"
+              value={DUMMY_RESULTS.maxDrawdown}
+              isPercent
+            />
+            <MetricCard label="Sharpe Ratio" value={DUMMY_RESULTS.sharpeRatio} />
+          </div>
+        </section>
+      </main>
+    </div>
   )
 }
 
