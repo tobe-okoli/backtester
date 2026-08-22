@@ -7,9 +7,9 @@ def fetch_stock_data(ticker: str, start_date: str, end_date: str) -> pd.DataFram
   
   stock_data = yf.download(ticker, 
   start=start_date, end=end_date)
-  stock_data.columns = stock_data.columns.droplevel("Ticker")
-
   if stock_data.empty:
     raise ValueError(f"No data found for ticker {ticker} between {start_date} and {end_date}.")
 
+
+  stock_data.columns = stock_data.columns.droplevel("Ticker")
   return stock_data

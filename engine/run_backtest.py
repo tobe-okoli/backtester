@@ -4,11 +4,11 @@ from portfolio import Portfolio
 import metrics
 from strategy import Strategy
 
-def run_backtest(ticker : str, start : str, end :str , strategy : Strategy, initial_cash: float) -> dict:
+def run_backtest(ticker : str, start : str, end :str , strategy : Strategy, initial_cash: float, slippage : float, commission: float) -> dict:
 
   data = fetch_stock_data(ticker, start, end)
   signals = strategy.generate_signals(data)
-  execution = Execution(0.001, 0.001)
+  execution = Execution(slippage, commission)
 
   port = Portfolio(data, signals, initial_cash, execution)
   final_port = port.simulate_trades()
@@ -17,7 +17,7 @@ def run_backtest(ticker : str, start : str, end :str , strategy : Strategy, init
   max_drawdown = metrics.calculate_max_drawdown(final_port)
   sr = metrics.calculate_sharpe(final_port)
 
-  results = {"Total Return": total_return, "Max Drawdown": max_drawdown, "Sharpe Ratio": sr}
+  results = {"Total Return": float(total_return), "Max Drawdown": float(max_drawdown), "Sharpe Ratio": float(sr)}
   
 
   return results
@@ -25,7 +25,7 @@ def run_backtest(ticker : str, start : str, end :str , strategy : Strategy, init
 
 if __name__ == "__main__":
   from strategy import SMAStrategy
-  result = run_backtest("AAPL", "2023-01-01","2024-01-01", SMAStrategy(short_window=50, long_window=100),10000 )
+  result = run_backtest("AAPL", "2023-01-01","2024-01-01", SMAStrategy(short_window=50, long_window=100),10000, 0.001, 0.001 )
   print(result)
 
 
