@@ -23,9 +23,4 @@ def run_backtest(ticker : str, start : str, end :str , strategy : Strategy, init
   return results
 
 
-if __name__ == "__main__":
-  from strategy import SMAStrategy
-  result = run_backtest("AAPL", "2023-01-01","2024-01-01", SMAStrategy(short_window=50, long_window=100),10000, 0.001, 0.001 )
-  print(result)
-
 
