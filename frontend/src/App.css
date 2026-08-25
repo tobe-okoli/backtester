@@ -43,9 +43,23 @@
   padding: 8px 10px;
 }
 
-.field input:focus-visible {
+.field input:focus-visible,
+.field select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+
+.field select {
+  font: inherit;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.strategy-field {
+  grid-column: 1 / -1;
 }
 
 .run-button {
@@ -61,8 +75,23 @@
   cursor: pointer;
 }
 
-.run-button:hover {
+.run-button:hover:not(:disabled) {
   opacity: 0.9;
+}
+
+.run-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-banner {
+  margin-top: 24px;
+  background: var(--red-bg);
+  border: 1px solid var(--red);
+  color: var(--red);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
 }
 
 .results {
