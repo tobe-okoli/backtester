@@ -1,4 +1,3 @@
-
 class Execution:
     def __init__(self, slippage: float, commission: float):
         self.slippage = slippage
