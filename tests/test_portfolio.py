@@ -17,3 +17,36 @@ def test_portfolio_simulation():
 
     expected = pd.DataFrame({"Total Value": [1000.0, 1100.0, 1200.0]}, index=data.index)
     pd.testing.assert_frame_equal(result, expected)
+
+def test_portfolio_no_trades():
+    data = pd.DataFrame({"Close": [100.0, 110.0, 120.0]}, index=pd.date_range("2023-01-01", periods=3))
+    signals = pd.Series([0, 0, 0], index=data.index)
+    execution = Execution(slippage=0.0, commission=0.0)
+
+    portfolio = Portfolio(data, signals, initial_cash=1000, execution=execution)
+    result = portfolio.simulate_trades()
+
+    expected = pd.DataFrame({"Total Value": [1000.0, 1000.0, 1000.0]}, index=data.index)
+    pd.testing.assert_frame_equal(result, expected)
+
+def test_buy_with_no_cash():
+    data = pd.DataFrame({"Close": [100.0, 110.0, 120.0]}, index=pd.date_range("2023-01-01", periods=3))
+    signals = pd.Series([1, 0, -1], index=data.index)
+    execution = Execution(slippage=0.0, commission=0.0)
+
+    portfolio = Portfolio(data, signals, initial_cash=50, execution=execution)
+    result = portfolio.simulate_trades()
+
+    expected = pd.DataFrame({"Total Value": [50.0, 50.0, 50.0]}, index=data.index)
+    pd.testing.assert_frame_equal(result, expected)
+
+def test_sell_with_no_shares():
+    data = pd.DataFrame({"Close": [100.0, 110.0, 120.0]}, index=pd.date_range("2023-01-01", periods=3))
+    signals = pd.Series([-1, 0, 0], index=data.index)
+    execution = Execution(slippage=0.0, commission=0.0)
+
+    portfolio = Portfolio(data, signals, initial_cash=1000, execution=execution)
+    result = portfolio.simulate_trades()
+
+    expected = pd.DataFrame({"Total Value": [1000.0, 1000.0, 1000.0]}, index=data.index)
+    pd.testing.assert_frame_equal(result, expected)
