@@ -1,107 +1,108 @@
-import { useState } from 'react'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
 
-const API_URL = 'http://127.0.0.1:8000/backtest'
+const API_URL = "https://backtester-api-n9ye.onrender.com/backtest";
 
 const STRATEGY_OPTIONS = [
-  { value: 'sma', label: 'SMA Crossover' },
-  { value: 'donchian', label: 'Donchian Breakout' },
-  { value: 'bollinger_bands_rsi', label: 'Bollinger Bands + RSI' },
-]
+  { value: "sma", label: "SMA Crossover" },
+  { value: "donchian", label: "Donchian Breakout" },
+  { value: "bollinger_bands_rsi", label: "Bollinger Bands + RSI" },
+];
 
 // Field definitions per strategy — key must match the backend's
 // strategy_params shape exactly.
 const STRATEGY_FIELDS = {
   sma: [
-    { key: 'short_window', label: 'Short Window', default: 50 },
-    { key: 'long_window', label: 'Long Window', default: 100 },
+    { key: "short_window", label: "Short Window", default: 50 },
+    { key: "long_window", label: "Long Window", default: 100 },
   ],
-  donchian: [{ key: 'window', label: 'Window', default: 20 }],
+  donchian: [{ key: "window", label: "Window", default: 20 }],
   bollinger_bands_rsi: [
-    { key: 'window', label: 'Window', default: 20 },
-    { key: 'stdev', label: 'Std Dev', default: 2, step: '0.1' },
-    { key: 'rsi_window', label: 'RSI Window', default: 14 },
-    { key: 'rsi_overbought', label: 'RSI Overbought', default: 70 },
-    { key: 'rsi_oversold', label: 'RSI Oversold', default: 30 },
+    { key: "window", label: "Window", default: 20 },
+    { key: "stdev", label: "Std Dev", default: 2, step: "0.1" },
+    { key: "rsi_window", label: "RSI Window", default: 14 },
+    { key: "rsi_overbought", label: "RSI Overbought", default: 70 },
+    { key: "rsi_oversold", label: "RSI Oversold", default: 30 },
   ],
-}
+};
 
 function defaultParamsFor(strategyType) {
-  const params = {}
+  const params = {};
   for (const field of STRATEGY_FIELDS[strategyType]) {
-    params[field.key] = field.default
+    params[field.key] = field.default;
   }
-  return params
+  return params;
 }
 
 function formatPercent(value) {
-  return `${(value * 100).toFixed(2)}%`
+  return `${(value * 100).toFixed(2)}%`;
 }
 
 function MetricCard({ label, value, isPercent }) {
-  const isNegative = value < 0
+  const isNegative = value < 0;
   return (
     <div className="metric-card">
       <div className="metric-label">{label}</div>
-      <div className={`metric-value ${isNegative ? 'negative' : 'positive'}`}>
+      <div className={`metric-value ${isNegative ? "negative" : "positive"}`}>
         {isPercent ? formatPercent(value) : value.toFixed(2)}
       </div>
     </div>
-  )
+  );
 }
 
 // FastAPI validation errors can return `detail` as a string or as a list
 // of pydantic error objects — normalize either into a readable string.
 function extractErrorMessage(body) {
-  if (!body) return 'Something went wrong.'
-  const { detail } = body
-  if (typeof detail === 'string') return detail
+  if (!body) return "Something went wrong.";
+  const { detail } = body;
+  if (typeof detail === "string") return detail;
   if (Array.isArray(detail)) {
-    return detail
-      .map((err) => err.msg || JSON.stringify(err))
-      .join('; ')
+    return detail.map((err) => err.msg || JSON.stringify(err)).join("; ");
   }
-  return 'Something went wrong.'
+  return "Something went wrong.";
 }
 
 function App() {
   const [form, setForm] = useState({
-    ticker: 'AAPL',
-    start: '2023-01-01',
-    end: '2024-01-01',
+    ticker: "AAPL",
+    start: "2023-01-01",
+    end: "2024-01-01",
     initialCash: 10000,
     slippage: 0.001,
     commission: 0.001,
-  })
-  const [strategyType, setStrategyType] = useState('sma')
-  const [strategyParams, setStrategyParams] = useState(defaultParamsFor('sma'))
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [results, setResults] = useState(null)
+  });
+  const [strategyType, setStrategyType] = useState("sma");
+  const [strategyParams, setStrategyParams] = useState(defaultParamsFor("sma"));
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [results, setResults] = useState(null);
 
   const handleChange = (field) => (e) => {
-    setForm((prev) => ({ ...prev, [field]: e.target.value }))
-  }
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  };
 
   const handleStrategyChange = (e) => {
-    const nextType = e.target.value
-    setStrategyType(nextType)
-    setStrategyParams(defaultParamsFor(nextType))
-  }
+    const nextType = e.target.value;
+    setStrategyType(nextType);
+    setStrategyParams(defaultParamsFor(nextType));
+  };
 
   const handleParamChange = (key) => (e) => {
-    setStrategyParams((prev) => ({ ...prev, [key]: e.target.value }))
-  }
+    setStrategyParams((prev) => ({ ...prev, [key]: e.target.value }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-    setResults(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setResults(null);
 
     const numericParams = Object.fromEntries(
-      Object.entries(strategyParams).map(([key, value]) => [key, Number(value)]),
-    )
+      Object.entries(strategyParams).map(([key, value]) => [
+        key,
+        Number(value),
+      ]),
+    );
 
     const body = {
       ticker: form.ticker,
@@ -112,40 +113,42 @@ function App() {
       commission: Number(form.commission),
       strategy_type: strategyType,
       strategy_params: numericParams,
-    }
+    };
 
-    let response
+    let response;
     try {
       response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-      })
+      });
     } catch {
-      setError('Could not reach the backend. Is it running on http://127.0.0.1:8000?')
-      setLoading(false)
-      return
+      setError("Could not reach the backend. Please try again shortly.");
+      setLoading(false);
+      return;
     }
 
     // The backend is expected to return JSON, but errors can arrive as a
     // plain-text body (e.g. an uncaught server exception) — don't let a
     // parse failure masquerade as "backend unreachable".
-    let data = null
+    let data = null;
     try {
-      data = await response.json()
+      data = await response.json();
     } catch {
       // leave data as null; handled below
     }
 
     if (!response.ok) {
       setError(
-        data ? extractErrorMessage(data) : `Request failed: ${response.status} ${response.statusText}`,
-      )
+        data
+          ? extractErrorMessage(data)
+          : `Request failed: ${response.status} ${response.statusText}`,
+      );
     } else {
-      setResults(data)
+      setResults(data);
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   return (
     <div className="app">
@@ -161,7 +164,7 @@ function App() {
               id="ticker"
               type="text"
               value={form.ticker}
-              onChange={handleChange('ticker')}
+              onChange={handleChange("ticker")}
             />
           </div>
 
@@ -171,7 +174,7 @@ function App() {
               id="start"
               type="date"
               value={form.start}
-              onChange={handleChange('start')}
+              onChange={handleChange("start")}
             />
           </div>
 
@@ -181,7 +184,7 @@ function App() {
               id="end"
               type="date"
               value={form.end}
-              onChange={handleChange('end')}
+              onChange={handleChange("end")}
             />
           </div>
 
@@ -191,7 +194,7 @@ function App() {
               id="initialCash"
               type="number"
               value={form.initialCash}
-              onChange={handleChange('initialCash')}
+              onChange={handleChange("initialCash")}
             />
           </div>
 
@@ -202,7 +205,7 @@ function App() {
               type="number"
               step="0.001"
               value={form.slippage}
-              onChange={handleChange('slippage')}
+              onChange={handleChange("slippage")}
             />
           </div>
 
@@ -213,7 +216,7 @@ function App() {
               type="number"
               step="0.001"
               value={form.commission}
-              onChange={handleChange('commission')}
+              onChange={handleChange("commission")}
             />
           </div>
 
@@ -246,7 +249,7 @@ function App() {
           ))}
 
           <button type="submit" className="run-button" disabled={loading}>
-            {loading ? 'Running…' : 'Run Backtest'}
+            {loading ? "Running…" : "Run Backtest"}
           </button>
         </form>
 
@@ -258,21 +261,24 @@ function App() {
             <div className="metrics-row">
               <MetricCard
                 label="Total Return"
-                value={results['Total Return']}
+                value={results["Total Return"]}
                 isPercent
               />
               <MetricCard
                 label="Max Drawdown"
-                value={results['Max Drawdown']}
+                value={results["Max Drawdown"]}
                 isPercent
               />
-              <MetricCard label="Sharpe Ratio" value={results['Sharpe Ratio']} />
+              <MetricCard
+                label="Sharpe Ratio"
+                value={results["Sharpe Ratio"]}
+              />
             </div>
           </section>
         )}
       </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
