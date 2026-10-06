@@ -11,7 +11,7 @@ from strategy import SMAStrategy, DonchianChannelStrategy, BollingerBandsRSIStra
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "https://backtester-black-eta.vercel.app/"],
     allow_methods=["*"],
     allow_headers=["*"]
 )
